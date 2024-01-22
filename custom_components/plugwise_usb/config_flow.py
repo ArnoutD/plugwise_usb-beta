@@ -6,9 +6,6 @@ from typing import Any
 import serial.tools.list_ports
 import voluptuous as vol
 
-from .plugwise_usb import Stick
-from .plugwise_usb.exceptions import StickError
-
 from homeassistant.components import usb
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_BASE
@@ -16,6 +13,8 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import CONF_MANUAL_PATH, CONF_USB_PATH, DOMAIN
+from .plugwise_usb import Stick
+from .plugwise_usb.exceptions import StickError
 
 
 @callback
@@ -41,16 +40,16 @@ async def validate_usb_connection(
     api_stick = Stick(device_path, use_cache=False)
     mac = ""
     try:
-        await api_stick.async_connect()
+        await api_stick.connect()
     except StickError:
         errors[CONF_BASE] = "cannot_connect"
     else:
         try:
-            await api_stick.async_initialize()
+            await api_stick.initialize()
             mac = api_stick.mac_stick
         except StickError:
             errors[CONF_BASE] = "stick_init"
-    await api_stick.async_disconnect()
+    await api_stick.disconnect()
     return errors, mac
 
 
